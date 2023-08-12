@@ -17,8 +17,8 @@ public class UserController : Controller
     public async Task<IActionResult> RegistrateNewUser(string? newLogin, string? newPassword)
     {
         var response = await services.AddNewUserAsync(newLogin,newPassword);
-
-        return (response)? Json(response) : BadRequest();
+        
+        return (response)? Json(await services.GenerateTokenAsync(newLogin,newPassword)) : BadRequest();
     }
 
     [HttpGet]
@@ -26,6 +26,16 @@ public class UserController : Controller
     {
         var response = await services.AuthorizeAsync(login,password);
 
-        return (response is not null )? Json(response) : BadRequest();
+        if (response is null)
+            return BadRequest();
+        
+        var controllerResponse = new
+        {
+            jwtToken = await services.GenerateTokenAsync(login,password),
+            User = response
+        };
+        
+        
+        return Json(controllerResponse);
     }
 }

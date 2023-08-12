@@ -17,12 +17,16 @@ public class Present
     [Column("present_status")]
     public bool Status { get; set; }
     
-    [Column("User")]
+    [Column("is_delete")]
+    public bool IsDelete { get; set; }
+    
     [ForeignKey(nameof(Present.User))]
     public Guid UserId { get; set; }
     
     [Column("present_add_date")]
     public DateTime PresentAddDate { get; set; }
+    
+    
     
     public User User { get; set; }
     

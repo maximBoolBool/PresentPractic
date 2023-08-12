@@ -13,29 +13,24 @@ public class DefaultPresentService : IPresentService
         db = _db;
     }
     
-    public async Task<Present?> AddNewPresentAsync(string? userID,string? presentName,string? presentDescription)
+    public async Task<Present?> AddNewPresentAsync(string? userLogin,string? presentName,string? presentDescription)
     {
-        if (userID == null || presentName == null || presentDescription == null)
+        if (userLogin == null || presentName == null || presentDescription == null)
             return null ;
 
-        if (!Guid.TryParse(userID, out Guid ID ))
-            return null;
-        
-        await db.Presents.AddAsync(new ()
+        var newPresent = new Present()
         {
+            Id = Guid.NewGuid(),
             PresentName = presentName,
             PresentDescription = presentDescription,
-            UserId = ID,
+            UserId = await db.Users.Where(user => user.Login.Equals(userLogin)).Select(user => user.Id)
+                .FirstOrDefaultAsync(),
             PresentAddDate = DateTime.UtcNow
-        } );
+        };
         
+        await db.Presents.AddAsync(newPresent);
         await db.SaveChangesAsync();
-        
-        var response = await db.Presents
-            .Include(present => present.User )
-            .FirstOrDefaultAsync(present => present.PresentName.Equals(presentName) && present.User.Id.Equals(userID));
-        
-        return response ;
+        return newPresent ;
     }
     
     public async Task<bool> ChangePresentStatusAsync(string? PresentId)
@@ -60,5 +55,21 @@ public class DefaultPresentService : IPresentService
         
         return true;
     }
-    
+
+    public async Task<bool> DeletePresentAsync(string? presentId)
+    {
+        if (!Guid.TryParse(presentId, out Guid presentGuid))
+            return false;
+        
+        var present = await db.Presents.FirstOrDefaultAsync(present => present.Id.Equals(presentGuid));
+
+        if (present is null)
+            return false;
+
+        present.IsDelete = true;
+
+        db.Presents.Update(present);
+        await db.SaveChangesAsync();
+        return true;
+    }
 }

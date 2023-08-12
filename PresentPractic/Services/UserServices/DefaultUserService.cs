@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PresentPractic.Models.DbModels;
 
 namespace PresentPractic.Services;
@@ -42,7 +45,7 @@ public class DefaultUserService : IUserServices
             return null;
 
         var response = await db.Users
-            .Include(user => user.Presents)
+            .Include(user => user.Presents.Where(user => !user.IsDelete))
             .FirstOrDefaultAsync(user => user.Login.Equals(userLogin) && userPassword.Equals(userPassword) && !user.IsDelete );
         
         return response;
@@ -85,8 +88,32 @@ public class DefaultUserService : IUserServices
             return null;
 
         var user = await db.Users
-            .Include(user => user.Presents).FirstOrDefaultAsync();
+            .Include(user => user.Presents.Where(present => !present.IsDelete))
+            .FirstOrDefaultAsync();
 
         return user;
     }
+
+    public async Task<string?> GenerateTokenAsync(string? login,string? password )
+    {
+        var claims = new List<Claim>()
+        {
+            new ("login",login),
+            new ("password",password)
+        };
+
+        var jwt = new JwtSecurityToken(
+            issuer:AuthOptions.AuthOptions.ISSUER,
+            audience:AuthOptions.AuthOptions.AUDIENCE,
+            claims: claims,
+            expires: DateTime.UtcNow.Add(TimeSpan.FromHours(3)),
+            signingCredentials:new SigningCredentials(AuthOptions.AuthOptions.GetSymmetricSecurityKey(),SecurityAlgorithms.HmacSha256));
+
+        return new JwtSecurityTokenHandler().WriteToken(jwt);
+
+    }
+    
+    
+    
+    
 }
