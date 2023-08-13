@@ -26,8 +26,6 @@ public class Present
     [Column("present_add_date")]
     public DateTime PresentAddDate { get; set; }
     
-    
-    
     public User User { get; set; }
     
 }

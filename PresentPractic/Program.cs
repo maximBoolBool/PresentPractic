@@ -10,6 +10,7 @@ using PresentPractic.Services;
 var builder = WebApplication.CreateBuilder();
 var connectionString = builder.Configuration.GetConnectionString("DefaulttConnection");
 
+builder.Services.AddAutoMapper(typeof(MapperService));
 builder.Services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

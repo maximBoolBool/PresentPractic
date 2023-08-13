@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PresentPractic.Services;
 
@@ -9,8 +10,11 @@ public class PresentController : Controller
 {
     private IPresentService service;
 
-    public PresentController(IPresentService _service)
+    private IMapper mapperService;
+    
+    public PresentController(IPresentService _service , IMapper _mapperService )
     {
+        mapperService = _mapperService;
         service = _service;
     }
 
@@ -38,5 +42,5 @@ public class PresentController : Controller
 
         return (response) ? Ok() : BadRequest();
     }
-
+    
 }
