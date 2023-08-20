@@ -12,8 +12,7 @@ public interface IUserServices
     public Task<bool> ChangeUserLoginAsync(string? userOldlogin,string? userNewLogin , string? userPassword );
 
     public Task<User?> GetChoosenUserAsync(string? userLogin);
-
-
+    
     public Task<string?> GenerateTokenAsync(string? login,string? password);
 
 

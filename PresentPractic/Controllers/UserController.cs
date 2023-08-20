@@ -63,4 +63,16 @@ public class UserController : Controller
 
         return Json(response);
     }
+
+
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> GetChoosenLogin(string? userLogin)
+    {
+        var buff = await services.GetChoosenUserAsync(userLogin);
+        var responseUser = mapper.Map<User,DTOUser>(buff);
+        
+        return Json(responseUser);
+    }
+    
 }
